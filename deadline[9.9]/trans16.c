@@ -3,6 +3,7 @@
 
 #define N 256
 
+// fixit: название ф-и не соответствует её коду ... есть готовая ф-я pow в библиотеке math. 
 unsigned long long int mul(unsigned long long int a, int n)	/*raising value a to the power of n*/
 {
 	int i;
@@ -27,6 +28,7 @@ int read_num(char* arr, int n)	/*reading the char array[n]*/
 
 	while (((a = getchar()) != '\n') && (i < n))
 	{
+		// а почему не просто arr[i] = a ?
 		*(arr + i) = a;
 		i++;
 	}
@@ -42,7 +44,9 @@ void write_num(char* arr, int n)	/*printing the array*/
 	putchar('\n');
 }
 
-
+// зачем писать комментарии, если можно просто чуть подробнее названить ф-ю
+// сделать структуру Number, внутри которой есть поля char* и количество символов 
+// например, transferToDecimal(Number number, int currentNumberSystem)
 unsigned long long int sys1_dec(char* arr, int n, int sys1)	/*transfer from current number system to decimal n.s.*/
 {
 	int i;
@@ -51,9 +55,10 @@ unsigned long long int sys1_dec(char* arr, int n, int sys1)	/*transfer from curr
 
 	for (i = 0; i < n; i++)
 	{
-		
+		// fixit: используйте явные константы: '0', например
 		ch = *(arr + i) - 48;
 
+		// fixit: 7?
 		if (ch > 9)
 			ch -= 7;
 
@@ -114,6 +119,10 @@ int main()
 	assert((sys1 <= 16) && (sys1 >= 2));
 	assert((sys2 <= 16) && (sys2 >= 2));
 
+	// я бы ожидал, что у вас будет ф-я Number transferNumberSystem(Number originNumber, int originNumberSystem, int targetNumberSystem)
+	// что, откуда, куда ... возвращаем новое число
+	// то, что вы реализовали эту функциональность через перевод в 10 - это детали реализации.
+	
 	if (sys1 == sys2)
 	{	
 		write_num(num, n);
