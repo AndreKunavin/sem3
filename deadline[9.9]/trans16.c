@@ -1,145 +1,122 @@
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
+#include <stdlib.h>
 
 #define N 256
 
-// fixit: название ф-и не соответствует её коду ... есть готовая ф-я pow в библиотеке math. 
-unsigned long long int mul(unsigned long long int a, int n)	/*raising value a to the power of n*/
+struct number
 {
-	int i;
-	unsigned long long int c = 0;
+	char* num;
+	int len;
+};
 
-	if (n == 0)
-		return 1;
-	
-	assert(n >= 0);
-
-	c = a;
-	for (i = 1; i < n; i++)
-		a *= c;
-
-	return a;
-}
-
-int read_num(char* arr, int n)	/*reading the char array[n]*/
+int read_num(char* arr, int n)
 {
 	int i = 0;
 	char a;
 
 	while (((a = getchar()) != '\n') && (i < n))
 	{
-		// а почему не просто arr[i] = a ?
-		*(arr + i) = a;
+		arr[i] = a;
 		i++;
 	}
 	return i;
 }
 
-void write_num(char* arr, int n)	/*printing the array*/
+void write_num(struct number Origin)
 {
 	int i;
 	
-	for (i = 0; i < n; i++)
-		putchar(*(arr + i));
+	for (i = 0; i < Origin.len; i++)
+		putchar(Origin.num[i]);
 	putchar('\n');
 }
 
-// зачем писать комментарии, если можно просто чуть подробнее названить ф-ю
-// сделать структуру Number, внутри которой есть поля char* и количество символов 
-// например, transferToDecimal(Number number, int currentNumberSystem)
-unsigned long long int sys1_dec(char* arr, int n, int sys1)	/*transfer from current number system to decimal n.s.*/
+unsigned long long int sys1_dec(struct number Origin, int sys1)
 {
 	int i;
 	int ch;
 	unsigned long long int dec = 0;
 
-	for (i = 0; i < n; i++)
+	for (i = 0; i < Origin.len; i++)
 	{
-		// fixit: используйте явные константы: '0', например
-		ch = *(arr + i) - 48;
+		ch = Origin.num[i] - '0';
 
-		// fixit: 7?
 		if (ch > 9)
-			ch -= 7;
+			ch -= 'A' - '9' - 1;
 
 		assert(ch < sys1);
-		//printf("%d ", ch);
 
-		dec += ch * mul(sys1, n - i - 1);
-		//printf("%d: ", n - i - 1);
-		//printf("%lld ", dec); 
+		dec += ch * (unsigned long long int) pow(sys1, Origin.len - i - 1);
 	}
-	//putchar('\n');
 	return dec;
 }
 
-void dec_sys2(unsigned long long int dec, int sys2)	/*transfer fron decimal n.s. to target n.s.*/
+struct number dec_sys2(unsigned long long int dec, int sys2)
 {
 	unsigned long long int j = 0;
-	int n = 0;
 	int i;
 
+	struct number Target;
+	Target.num = (char*)malloc(N * sizeof(char));
+	
 	j = dec;
 	while ((j /= sys2) != 0)
-                ++n;
-	
+		++Target.len;
 	int ch = 0;
 
-	for (i = n; i >= 0; i--)
-        {
-		ch = dec / mul(sys2, i);
+	for (i = Target.len; i >= 0; i--)
+	{
+		ch = dec / (unsigned long long int)pow(sys2, i);
 
 		if (ch > 9)
-			ch += 7;
+			ch += 'A' - '9' - 1;
 
-		putchar(ch + '0');
-                dec %= mul(sys2, i);
+		Target.num[Target.len - i] = ch + '0';
+		dec %= (unsigned long long int)pow(sys2, i);
         }
+	++Target.len;
+	return Target;
+}
 
-	putchar('\n');
+struct number transfer(struct number Origin, int sys1, int sys2)
+{	
+	if (sys1 == sys2)
+		return Origin;
+
+	unsigned long long int dec = sys1_dec(Origin, sys1);
+	struct number Target = dec_sys2(dec, sys2);
+	
+	return Target;
 }
 
 
 int main()
 {
-	char num[N] = {};				/*space for the number*/
-	int i;
-	int n = 0;	
+	char* num = (char*)malloc(N);
+	struct number Origin, Target;
 
 	printf("Write down the number: ");
-	n = read_num(num, N);
-	assert(n <= 16);
-
-	int sys1 = 0;					/*current n.s.*/
-	int sys2 = 0;					/*target n.s.*/
-
-	printf("Write down current and target number systems: ");
-	scanf("%d %d", &sys1, &sys2);
-
-	assert((sys1 <= 16) && (sys1 >= 2));
-	assert((sys2 <= 16) && (sys2 >= 2));
-
-	// я бы ожидал, что у вас будет ф-я Number transferNumberSystem(Number originNumber, int originNumberSystem, int targetNumberSystem)
-	// что, откуда, куда ... возвращаем новое число
-	// то, что вы реализовали эту функциональность через перевод в 10 - это детали реализации.
+	Origin.len = read_num(num, N);
+	assert(Origin.len <= 16);
+	Origin.num = num;
 	
-	if (sys1 == sys2)
-	{	
-		write_num(num, n);
-		return 0;
-	}
-
-	unsigned long long int dec = 0;
-	dec = sys1_dec(num, n, sys1);
-	if (sys2 == 10)
-	{
-		printf("%lld\n", dec);
-		return 0;
-	}
+	int orig_sys = 0;
+	int tar_sys = 0;
+	printf("Write down origin and target number systems: ");
+	scanf("%d %d", &orig_sys, &tar_sys);
 	
+	assert((orig_sys <= 16) && (orig_sys >= 2));
+	assert((tar_sys <= 16) && (tar_sys >= 2));
+	
+	Target = transfer(Origin, orig_sys, tar_sys);
 	printf("Result: ");
-	dec_sys2(dec, sys2);
+	write_num(Target);
 	
+	free(Target.num);
+	free(num);
+
 	return 0;
 }
 
