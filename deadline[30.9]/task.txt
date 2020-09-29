@@ -1,0 +1,7 @@
+gcc hw.c 1
+./a.out 2
+ls -all 5
+gcc hw.c 7
+./a.out 8
+pwd 10
+echo Hello, World! 11
