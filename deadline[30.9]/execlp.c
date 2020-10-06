@@ -5,10 +5,16 @@
 int main()
 {
 	int pid = 0;
+	char** arr;
+	arr[0] = "gcc";
+	arr[1] = "hw.c";
+	arr[2] = NULL;
+
+	//printf("%s\n", arr[0]);
 	pid = fork();
 	//printf("%d\n", pid);
 	if (pid == 0)
-		execlp("gcc", "gcc", "hw.c", NULL);
+		execvp("gcc", arr);
 	else
 	{
 		int s = 0;
